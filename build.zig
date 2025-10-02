@@ -99,6 +99,9 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    const win32 = b.dependency("zigwin32", .{ .target = win64_target, .optimize = optimize });
+    const wind32Mod = win32.module("win32");
+
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
     // step). By default the install prefix is `zig-out/` but can be overridden
