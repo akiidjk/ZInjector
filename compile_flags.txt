@@ -1,0 +1,6 @@
+--target=x86_64-w64-mingw32
+-I/usr/x86_64-w64-mingw32/include
+-I/usr/x86_64-w64-mingw32/sys-root/mingw/include
+-DWIN32
+-D_WIN32
+-D__WIN32__

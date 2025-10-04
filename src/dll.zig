@@ -1,17 +1,6 @@
+//! Evil dll to inject
 const std = @import("std");
 const win32 = @import("win32");
-
-// These checks aren't ~technically~ required, but they can help a lot to prevent
-// weird build configurations from generating invalid executables and prevent
-// headaches and wasted debugging.
-// comptime {
-//     if (builtin.os.tag != .windows) {
-//         @compileError("target operating system must be windows");
-//     }
-//     if (builtin.output_mode != .Lib or builtin.link_mode != .Dynamic) {
-//         @compileError("output executable format must be a shared/dynamic library");
-//     }
-// }
 
 pub fn DllMain(
     hinstDLL: std.os.windows.HINSTANCE,
@@ -25,7 +14,7 @@ pub fn DllMain(
             _ = win32.ui.windows_and_messaging.MessageBoxA(null, "PALLE ATTACCATE e ESEGUITE", "PALLONE", win32.ui.windows_and_messaging.MB_ICONEXCLAMATION);
         },
         win32.system.system_services.DLL_PROCESS_DETACH => {
-            _ = win32.ui.windows_and_messaging.MessageBoxA(null, "PALLE STACCATE", "PALLONE", win32.ui.windows_and_messaging.MB_ICONEXCLAMATION);
+            _ = win32.ui.windows_and_messaging.MessageBoxA(null, "PALLE CRAZY", "PALLONE", win32.ui.windows_and_messaging.MB_ICONEXCLAMATION);
         },
         win32.system.system_services.DLL_THREAD_ATTACH => {
             _ = win32.ui.windows_and_messaging.MessageBoxA(null, "PALLINE CREATE", "PALLONE", win32.ui.windows_and_messaging.MB_ICONEXCLAMATION);
