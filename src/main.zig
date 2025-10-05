@@ -9,7 +9,22 @@ const war = std.log.warn;
 const err = std.log.err;
 
 pub fn main() !void {
-    debug("Viva il dux.\n", .{});
+    const alloc: std.mem.Allocator = std.heap.page_allocator;
+    const argv = try std.process.argsAlloc(alloc);
+    const argc = argv.len;
+
+    debug("Args number: {d}", .{argc});
+
+    if (argc != 3) {
+        err("usage: {s} <path-to-dll> <PID>", .{argv[0]});
+        return;
+    }
+
+    const PATH_DLL = argv[1];
+    const PID = try std.fmt.parseInt(i32, argv[2], 10);
+
+    debug("DLL: {s}", .{PATH_DLL});
+    debug("PID: {d}", .{PID});
 
     // try ZInjector.bufferedPrint();
 }
