@@ -14,12 +14,14 @@ pub fn build(b: *std.Build) void {
 
     const win64_target = b.resolveTargetQuery(.{ .cpu_arch = .x86_64, .os_tag = .windows });
     const TARGETS = [_]std.Target.Query{
-        .{ .cpu_arch = .x86_64, .os_tag = .linux },
+        // .{ .cpu_arch = .x86_64, .os_tag = .linux },
         .{ .cpu_arch = .x86_64, .os_tag = .windows },
     };
 
-    // Dll compilation for windows
+    //Deps
     const zigwin32 = b.dependency("zigwin32", .{});
+
+    // Dll compilation for windows
     const dll = b.addLibrary(.{
         .name = "evildll",
         .linkage = .dynamic,
@@ -55,6 +57,7 @@ pub fn build(b: *std.Build) void {
                 .link_libc = true,
                 .imports = &.{
                     .{ .name = "ZInjector", .module = mod },
+                    .{ .name = "win32", .module = zigwin32.module("win32") },
                 },
             }),
         });
