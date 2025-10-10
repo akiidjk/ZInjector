@@ -5,7 +5,7 @@ const win32 = @import("win32");
 
 const debug = std.log.debug;
 const info = std.log.info;
-const war = std.log.warn;
+const warn = std.log.warn;
 const err = std.log.err;
 
 pub fn main() !void {
@@ -26,20 +26,29 @@ pub fn main() !void {
     debug("DLL: {s}", .{DLL_PATH});
     debug("PID: {d}", .{PID});
 
+    errdefer {
+        @setEvalBranchQuota(5000);
+        const errors = win32.foundation.GetLastError();
+        warn("failed with code 0x{X}: {}\n", .{ @errorCast(errors), errors });
+    }
+
     const hProcess = win32.system.threading.OpenProcess(win32.system.threading.PROCESS_ALL_ACCESS, win32.everything.FALSE, PID);
     if (hProcess == null) {
         err("Failed to handle the process not found or not accesible", .{});
         return;
     }
+    defer _ = win32.foundation.CloseHandle(hProcess);
 
-    const allocatedMem = win32.system.memory.VirtualAllocEx(hProcess, null, DLL_PATH.len + 1, (win32.system.memory.VIRTUAL_ALLOCATION_TYPE{ .COMMIT = 1, .RESERVE = 1 }), win32.system.memory.PAGE_READWRITE);
+    const allocatedMem = win32.system.memory.VirtualAllocEx(hProcess, null, DLL_PATH.len, (win32.system.memory.VIRTUAL_ALLOCATION_TYPE{ .COMMIT = 1, .RESERVE = 1 }), win32.system.memory.PAGE_READWRITE);
     if (allocatedMem == null) {
         err("Failed to handle the memory of the process", .{});
         return;
     }
-    debug("Allocated memory: {?}", .{allocatedMem});
+    debug("Allocated memory: {any}", .{allocatedMem});
 
-    _ = win32.system.diagnostics.debug.WriteProcessMemory(hProcess, allocatedMem, DLL_PATH.ptr, DLL_PATH.len + 1, null);
+    if (win32.system.diagnostics.debug.WriteProcessMemory(hProcess, allocatedMem, DLL_PATH.ptr, (DLL_PATH.len + 1) * 2, null) == 0) {
+        return error.WPMPathCopyFailed;
+    }
 
     const kernel32Base = win32.system.library_loader.GetModuleHandleA("kernel32.dll");
     if (kernel32Base == null) {
@@ -47,13 +56,14 @@ pub fn main() !void {
         return;
     }
 
-    const loadLibraryAddress = win32.system.library_loader.GetProcAddress(kernel32Base, "LoadLibraryA");
+    const loadLibraryAddress = win32.system.library_loader.GetProcAddress(kernel32Base, "LoadLibraryW");
 
     const hTread = win32.system.threading.CreateRemoteThread(hProcess, null, 0, @ptrCast(loadLibraryAddress), allocatedMem, 0, null);
     if (hTread == null) {
         err("Failed to create remote thread", .{});
     }
 
+    info("Waiting for loading", .{});
     _ = win32.system.threading.WaitForSingleObject(hTread, win32.everything.INFINITE);
-    _ = win32.foundation.CloseHandle(hProcess);
+    info("finished the injection", .{});
 }
