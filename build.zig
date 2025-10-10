@@ -12,11 +12,10 @@ pub fn build(b: *std.Build) void {
         optimize = b.standardOptimizeOption(.{});
     }
 
-    const win64_target = b.resolveTargetQuery(.{ .cpu_arch = .x86_64, .os_tag = .windows });
-    const TARGETS = [_]std.Target.Query{
-        // .{ .cpu_arch = .x86_64, .os_tag = .linux },
-        .{ .cpu_arch = .x86_64, .os_tag = .windows },
-    };
+    const win64_target = b.resolveTargetQuery(.{
+        .cpu_arch = .x86_64,
+        .os_tag = .windows,
+    });
 
     //Deps
     const zigwin32 = b.dependency("zigwin32", .{});
@@ -42,26 +41,24 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(testExe);
 
     // Injector
-    for (TARGETS) |TARGET| {
-        const mod = b.addModule("ZInjector", .{
-            .root_source_file = b.path("src/root.zig"),
+    const mod = b.addModule("ZInjector", .{
+        .root_source_file = b.path("src/root.zig"),
+        .target = win64_target,
+    });
+
+    const injector = b.addExecutable(.{
+        .name = "zinjector",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
             .target = win64_target,
-        });
+            .optimize = optimize,
+            .link_libc = true,
+            .imports = &.{
+                .{ .name = "ZInjector", .module = mod },
+                .{ .name = "win32", .module = zigwin32.module("win32") },
+            },
+        }),
+    });
 
-        const injector = b.addExecutable(.{
-            .name = "zinjector",
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/main.zig"),
-                .target = b.resolveTargetQuery(TARGET),
-                .optimize = optimize,
-                .link_libc = true,
-                .imports = &.{
-                    .{ .name = "ZInjector", .module = mod },
-                    .{ .name = "win32", .module = zigwin32.module("win32") },
-                },
-            }),
-        });
-
-        b.installArtifact(injector);
-    }
+    b.installArtifact(injector);
 }
