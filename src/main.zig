@@ -29,7 +29,7 @@ pub fn main() !void {
     errdefer {
         @setEvalBranchQuota(5000);
         const errors = win32.foundation.GetLastError();
-        warn("failed with code 0x{X}: {}\n", .{ @errorCast(errors), errors });
+        warn("failed with code 0x{s}: {any}\n", .{ @tagName(errors), errors });
     }
 
     const hProcess = win32.system.threading.OpenProcess(win32.system.threading.PROCESS_ALL_ACCESS, win32.everything.FALSE, PID);
