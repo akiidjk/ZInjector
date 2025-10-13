@@ -20,11 +20,24 @@ pub fn build(b: *std.Build) void {
     //Deps
     const zigwin32 = b.dependency("zigwin32", .{});
 
+    // Shared Module
+    const winModule = b.addModule("win", .{ .root_source_file = b.path("src/lib/win.zig"), .target = win64_target, .imports = &.{
+        .{
+            .name = "win32",
+            .module = zigwin32.module("win32"),
+        },
+    } });
+
+    const loggerModule = b.addModule("logger", .{
+        .root_source_file = b.path("src/lib/logger.zig"),
+        .target = win64_target,
+    });
+
     // Dll compilation for windows
     const dll = b.addLibrary(.{
         .name = "evildll",
         .linkage = .dynamic,
-        .root_module = b.createModule(.{ .link_libc = true, .root_source_file = b.path("src/dll.zig"), .target = win64_target, .optimize = optimize, .imports = &.{.{ .name = "win32", .module = zigwin32.module("win32") }} }),
+        .root_module = b.createModule(.{ .link_libc = true, .root_source_file = b.path("src/dll.zig"), .target = win64_target, .optimize = optimize, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } }),
     });
     b.installArtifact(dll);
 
@@ -37,12 +50,12 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
-    testExe.root_module.addCSourceFile(.{ .file = b.path("src/dlltester.c") });
+    testExe.root_module.addCSourceFile(.{ .file = b.path("src/test/dlltester.c") });
     b.installArtifact(testExe);
 
     // Injector
-    const mod = b.addModule("ZInjector", .{
-        .root_source_file = b.path("src/root.zig"),
+    const libmod = b.addModule("lib", .{
+        .root_source_file = b.path("src/lib/root.zig"),
         .target = win64_target,
     });
 
@@ -53,10 +66,7 @@ pub fn build(b: *std.Build) void {
             .target = win64_target,
             .optimize = optimize,
             .link_libc = true,
-            .imports = &.{
-                .{ .name = "ZInjector", .module = mod },
-                .{ .name = "win32", .module = zigwin32.module("win32") },
-            },
+            .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } },
         }),
     });
 
