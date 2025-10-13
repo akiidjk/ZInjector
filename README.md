@@ -14,7 +14,17 @@ I don't know yet what to implement, but the first steps are to learn Zig and imp
 - [LearnXInYMinutes](https://learnxinyminutes.com/zig/)
 - [Process Injection Techniques](https://www.ired.team/offensive-security/code-injection-process-injection)
 - [MITRE](https://attack.mitre.org/techniques/T1055/)
-https://github.com/marlersoft/zigwin32/tree/main
-https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
+- [DLL Injector C++](https://github.com/leetCipher/Malware.development/tree/main/dll-injector)
+- https://github.com/marlersoft/zigwin32/tree/main
+- https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
+
 For linux on arch install: mingw-w64-headers,mingw-w64-gcc
 For work the clangd lsp from zed i am using the compile_flags.txt file
+
+## Todo:
+
+- [x] PoC
+- [ ] Resolution of relative path to absolute path
+- [ ] Search process by name
+- [ ] First base with IMGUI
+...
