@@ -23,8 +23,8 @@ pub fn main() !void {
     const DLL_PATH = argv[1];
     const PID = try std.fmt.parseInt(u32, argv[2], 10);
 
-    debug("DLL: {s}", .{DLL_PATH});
-    debug("PID: {d}", .{PID});
+    // debug("DLL: {s}", .{DLL_PATH});
+    // debug("PID: {d}", .{PID});
 
     errdefer {
         @setEvalBranchQuota(5000);
@@ -56,7 +56,7 @@ pub fn main() !void {
         return;
     }
 
-    const loadLibraryAddress = win32.system.library_loader.GetProcAddress(kernel32Base, "LoadLibraryW");
+    const loadLibraryAddress = win32.system.library_loader.GetProcAddress(kernel32Base, "LoadLibraryA");
 
     const hTread = win32.system.threading.CreateRemoteThread(hProcess, null, 0, @ptrCast(loadLibraryAddress), allocatedMem, 0, null);
     if (hTread == null) {
