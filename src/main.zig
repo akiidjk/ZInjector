@@ -3,6 +3,7 @@ const std = @import("std");
 const lib = @import("lib");
 const logger = @import("logger");
 const win = @import("win");
+const zgui = @import("zgui");
 
 pub fn main() !void {
     var hProcess: ?*anyopaque = undefined;

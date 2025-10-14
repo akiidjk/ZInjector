@@ -36,6 +36,22 @@
             .url = "git+https://github.com/marlersoft/zigwin32.git#5587b16fa040573846a6bf531301f6206d31a6bf",
             .hash = "zigwin32-25.0.28-preview-AAAAAICM5AMResOGQnQ85mfe60TTOQeMtt7GRATUOKoP",
         },
+        .zgui = .{
+            .url = "git+https://github.com/zig-gamedev/zgui.git#7fa8081c208885b85e3fdfc043cd9d9cb9559123",
+            .hash = "zgui-0.6.0-dev--L6sZL7tbQAPRLYrcQAVx0V49tPHAXNxclZ-v8IP4wLr",
+        },
+        .zgpu = .{
+            .url = "git+https://github.com/zig-gamedev/zgpu.git#96f3ce2229e4836daec714a3f0b8c3c3218a6b2c",
+            .hash = "zgpu-0.12.0-dev-nqFT5LqgCACR_1wEhi7rveY3ocKJczfRaXQoisCmpohn",
+        },
+        .zglfw = .{
+            .url = "git+https://github.com/zig-gamedev/zglfw.git#6034a5623312c58bf5e64c1a2b686691c28575f4",
+            .hash = "zglfw-0.10.0-dev-zgVDNPKyIQCBi-wv_vxkvIQq1u0bP4D56Wszx_2mszc7",
+        },
+        .zpool = .{
+            .url = "git+https://github.com/zig-gamedev/zpool.git#7829cf02f78e8c39e19b802ccb47ed44037299c2",
+            .hash = "zpool-0.11.0-dev-bG692QtEAQCyqBnzSBJbJlY0-a_3v1YcjFTGmg0VBjOc",
+        },
     },
     .paths = .{
         "build.zig",
