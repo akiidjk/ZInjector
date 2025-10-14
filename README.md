@@ -26,7 +26,7 @@ For work the clangd lsp from zed i am using the compile_flags.txt file
 
 - [x] PoC
 - [x] Resolution of relative path to absolute path
-- [ ] Search process by name
+- [x] Search process by name
 - [ ] First base with IMGUI
 ...
 

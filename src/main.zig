@@ -5,23 +5,35 @@ const logger = @import("logger");
 const win = @import("win");
 
 pub fn main() !void {
+    var hProcess: ?*anyopaque = undefined;
+    var abs_path: []u8 = undefined;
     const alloc: std.mem.Allocator = std.heap.page_allocator;
     const argv = try std.process.argsAlloc(alloc);
     const argc = argv.len;
     defer alloc.free(argv);
 
-    if (argc != 3) {
-        logger.err("usage: {s} <path-to-dll> <PID>", .{argv[0]});
+    if (argc < 3) {
+        logger.err("usage: {s} <path-to-dll> <PID> or <process-name>", .{argv[0]});
         return;
     }
 
     const DLL_PATH = argv[1];
-    var abs_path: []u8 = undefined;
     defer alloc.free(abs_path);
-    const PID = try std.fmt.parseInt(u32, argv[2], 10);
 
-    logger.debug("DLL: {s}", .{DLL_PATH});
-    logger.debug("PID: {d}", .{PID});
+    if (lib.isADigitsString(argv[2])) {
+        const PID = try std.fmt.parseInt(u32, argv[2], 10);
+        hProcess = win.threads.OpenProcess(win.threads.PROCESS_ALL_ACCESS, win.FALSE, PID);
+        if (hProcess == null) {
+            logger.err("Failed to handle the process not found or not accesible", .{});
+            return;
+        }
+    } else {
+        hProcess = win.GetHandleProcessByName(argv[2]);
+        if (hProcess == null) {
+            logger.err("Failed to handle the process not found or not accesible", .{});
+            return;
+        }
+    }
 
     const isAbs = try lib.isAbsolutePath(DLL_PATH);
     if (!isAbs) {
@@ -30,19 +42,11 @@ pub fn main() !void {
         abs_path = DLL_PATH;
     }
 
-    logger.debug("ABS DLL: {s}", .{abs_path});
-
     //if we encounter a winapi error, print its exit code before exit
     errdefer {
         @setEvalBranchQuota(5000);
         const err = win.standard.GetLastError();
         logger.warn("failed with code 0x{s}: {}\n", .{ @errorFromInt(err), err });
-    }
-
-    const hProcess = win.threads.OpenProcess(win.threads.PROCESS_ALL_ACCESS, win.FALSE, PID);
-    if (hProcess == null) {
-        logger.err("Failed to handle the process not found or not accesible", .{});
-        return;
     }
 
     const allocatedMem = win.mem.VirtualAllocEx(hProcess, null, abs_path.len + 1, (win.mem.VIRTUAL_ALLOCATION_TYPE{ .COMMIT = 1, .RESERVE = 1 }), win.mem.PAGE_READWRITE);

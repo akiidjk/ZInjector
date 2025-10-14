@@ -41,7 +41,7 @@ test "isAbsolutePath Windows machine" {
 }
 
 const OsError = error{NotSupported};
-pub fn isAbsolutePath(path: []const u8) !bool {
+pub fn isAbsolutePath(path: [:0]const u8) !bool {
     const os = comptime builtin.target.os.tag;
     var lowerPath: [1024]u8 = undefined;
     _ = std.ascii.lowerString(&lowerPath, path);
@@ -63,7 +63,7 @@ pub fn isAbsolutePath(path: []const u8) !bool {
     }
 }
 
-pub fn getAbsPath(alloc: std.mem.Allocator, path: []const u8) ![]u8 {
+pub fn getAbsPath(alloc: std.mem.Allocator, path: [:0]const u8) ![]u8 {
     const cwd_path = try std.fs.cwd().realpathAlloc(alloc, ".");
     defer alloc.free(cwd_path);
 
@@ -73,4 +73,24 @@ pub fn getAbsPath(alloc: std.mem.Allocator, path: []const u8) ![]u8 {
     });
 
     return abs_path;
+}
+
+test "isADigitsString test case" {
+    try testing.expect(isADigitsString("1234") == true);
+    try testing.expect(isADigitsString("") == false);
+    try testing.expect(isADigitsString("    ") == false);
+    try testing.expect(isADigitsString("palle") == false);
+    try testing.expect(isADigitsString("02312") == true);
+}
+
+pub fn isADigitsString(string: [:0]const u8) bool {
+    if (string.len <= 0) {
+        return false;
+    }
+    for (string) |char| {
+        if (!std.ascii.isDigit(char)) {
+            return false;
+        }
+    }
+    return true;
 }

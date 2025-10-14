@@ -9,17 +9,15 @@ pub fn build(b: *std.Build) void {
     const zigwin32 = b.dependency("zigwin32", .{});
 
     // Shared Module
-    const winModule = b.addModule("win", .{ .root_source_file = b.path("src/lib/win.zig"), .target = target, .imports = &.{
-        .{
-            .name = "win32",
-            .module = zigwin32.module("win32"),
-        },
-    } });
-
     const loggerModule = b.addModule("logger", .{
         .root_source_file = b.path("src/lib/logger.zig"),
         .target = target,
     });
+
+    const winModule = b.addModule("win", .{ .root_source_file = b.path("src/lib/win.zig"), .target = target, .imports = &.{ .{
+        .name = "win32",
+        .module = zigwin32.module("win32"),
+    }, .{ .name = "logger", .module = loggerModule } } });
 
     // Dll compilation for windows
     const dll = b.addLibrary(.{
