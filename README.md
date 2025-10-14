@@ -18,6 +18,7 @@ I don't know yet what to implement, but the first steps are to learn Zig and imp
 - [Cool cheasheet (zig_in_depth)](https://codeberg.org/dude_the_builder/zig_in_depth)
 - https://github.com/marlersoft/zigwin32/tree/main
 - https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
+- https://mrscriptx.github.io/devlog/zig/2025/04/30/zig-linking-dear-imgui.html
 
 For linux on arch install: mingw-w64-headers,mingw-w64-gcc
 For work the clangd lsp from zed i am using the compile_flags.txt file
