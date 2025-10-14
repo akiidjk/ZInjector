@@ -29,3 +29,8 @@ For work the clangd lsp from zed i am using the compile_flags.txt file
 - [ ] Search process by name
 - [ ] First base with IMGUI
 ...
+
+## Command:
+
+Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
+Test: `zig build test -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
