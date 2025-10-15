@@ -7,11 +7,6 @@ pub fn build(b: *std.Build) void {
 
     //Deps
     const zigwin32 = b.dependency("zigwin32", .{});
-    const zgui = b.dependency("zgui", .{
-        .shared = false,
-        .with_implot = true,
-    });
-
     // Shared Module
     const loggerModule = b.addModule("logger", .{
         .root_source_file = b.path("src/lib/logger.zig"),
@@ -56,27 +51,6 @@ pub fn build(b: *std.Build) void {
             .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } },
         }),
     });
-
-    injector.root_module.addImport("zgui", zgui.module("root"));
-    injector.linkLibrary(zgui.artifact("imgui"));
-
-    { // Needed for glfw/wgpu rendering backend
-        const zglfw = b.dependency("zglfw", .{});
-        injector.root_module.addImport("zglfw", zglfw.module("root"));
-        if (target.result.os.tag == .linux) {
-            injector.linkLibrary(zglfw.artifact("glfw"));
-        }
-
-        const zpool = b.dependency("zpool", .{});
-        injector.root_module.addImport("zpool", zpool.module("root"));
-
-        const zgpu = b.dependency("zgpu", .{});
-        injector.root_module.addImport("zgpu", zgpu.module("root"));
-
-        if (target.result.os.tag == .linux) {
-            injector.linkLibrary(zgpu.artifact("zdawn"));
-        }
-    }
 
     b.installArtifact(injector);
 
