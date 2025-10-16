@@ -43,7 +43,7 @@ fn win32MainThread() std.os.windows.DWORD {
     }
     defer _ = win.system.console.FreeConsole();
     std.debug.print("Hello from the other side, take a cookie~\n", .{});
-    std.Thread.sleep(5 * std.time.ns_per_s);
+    std.Thread.sleep(120 * std.time.ns_per_s);
 
     return 0;
 }
