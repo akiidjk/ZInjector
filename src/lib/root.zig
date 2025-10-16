@@ -41,7 +41,7 @@ test "isAbsolutePath Windows machine" {
 }
 
 const OsError = error{NotSupported};
-pub fn isAbsolutePath(path: [:0]const u8) !bool {
+pub fn isAbsolutePath(path: []const u8) !bool {
     const os = comptime builtin.target.os.tag;
     var lowerPath: [1024]u8 = undefined;
     _ = std.ascii.lowerString(&lowerPath, path);
@@ -63,7 +63,7 @@ pub fn isAbsolutePath(path: [:0]const u8) !bool {
     }
 }
 
-pub fn getAbsPath(alloc: std.mem.Allocator, path: [:0]const u8) ![]u8 {
+pub fn getAbsPath(alloc: std.mem.Allocator, path: []const u8) ![]u8 {
     const cwd_path = try std.fs.cwd().realpathAlloc(alloc, ".");
     defer alloc.free(cwd_path);
 
@@ -93,4 +93,102 @@ pub fn isADigitsString(string: [:0]const u8) bool {
         }
     }
     return true;
+}
+
+pub fn convertToCString(string: []const u8) [:0]const u8 {
+    var tmp: [1024]u8 = undefined;
+    const fixedString = std.fmt.bufPrintZ(&tmp, "{s}", .{string}) catch |err| switch (err) {
+        error.NoSpaceLeft => {
+            return "";
+        },
+    };
+    return fixedString;
+}
+
+// Xor plaintext with classic single bytes so each bytes is xored with a key of one byte
+pub fn xorSingleBytes(allocator: std.mem.Allocator, plaintext: []const u8, key: u8) ![]u8 {
+    const ciphertext = try allocator.alloc(u8, plaintext.len);
+    var i: u32 = 0;
+    for (plaintext) |char| {
+        ciphertext[i] = char ^ key;
+        i += 1;
+    }
+    return ciphertext;
+}
+
+test "Xor test" {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    var msg = "Ciao";
+    var key: u8 = 0x4;
+    var ciphertext = try xorSingleBytes(allocator, msg, key);
+
+    defer allocator.free(ciphertext);
+    _ = try testing.expectEqualStrings(
+        "Gmek",
+        ciphertext,
+    );
+
+    msg = "Gmek";
+    key = 0x4;
+    ciphertext = try xorSingleBytes(allocator, msg, key);
+    _ = try testing.expectEqualStrings(
+        "Ciao",
+        ciphertext,
+    );
+
+    msg = "Ciao";
+    key = 0x0;
+    ciphertext = try xorSingleBytes(allocator, msg, key);
+    _ = try testing.expectEqualStrings(
+        "Ciao",
+        ciphertext,
+    );
+}
+
+// Xor plaintext with another string
+pub fn xorMultiBytes(allocator: std.mem.Allocator, plaintext: []const u8, key: []const u8) ![]u8 {
+    const ciphertext = try allocator.alloc(u8, plaintext.len);
+    var i: u32 = 0;
+    for (plaintext) |char| {
+        ciphertext[i] = char ^ key[i % key.len];
+        i += 1;
+    }
+    return ciphertext;
+}
+
+test "Text xor multibytes" {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    var msg: [:0]const u8 = "Prova";
+    var key: [:0]const u8 = "Pippo";
+    var ciphertext = try xorMultiBytes(allocator, msg, key);
+
+    defer allocator.free(ciphertext);
+
+    const expected1 = &[_]u8{ 0x00, 0x1b, 0x1f, 0x06, 0x0e };
+    _ = try testing.expect(std.mem.eql(u8, expected1, ciphertext));
+
+    msg = "ProvaProvaProvaProva";
+    key = "Pippo";
+    ciphertext = try xorMultiBytes(allocator, msg, key);
+
+    const expected2 = &[_]u8{
+        0x00, 0x1b, 0x1f, 0x06, 0x0e,
+        0x00, 0x1b, 0x1f, 0x06, 0x0e,
+        0x00, 0x1b, 0x1f, 0x06, 0x0e,
+        0x00, 0x1b, 0x1f, 0x06, 0x0e,
+    };
+    _ = try testing.expect(std.mem.eql(u8, expected2, ciphertext));
+
+    msg = "Ale";
+    key = "PippoPippo";
+    ciphertext = try xorMultiBytes(allocator, msg, key);
+
+    const expected3 = &[_]u8{ 0x11, 0x05, 0x15 };
+    _ = try testing.expect(std.mem.eql(u8, expected3, ciphertext));
 }
