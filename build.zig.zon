@@ -36,6 +36,10 @@
             .url = "git+https://github.com/marlersoft/zigwin32.git#5587b16fa040573846a6bf531301f6206d31a6bf",
             .hash = "zigwin32-25.0.28-preview-AAAAAICM5AMResOGQnQ85mfe60TTOQeMtt7GRATUOKoP",
         },
+        .cli = .{
+            .url = "git+https://github.com/sam701/zig-cli#f9a516ddc9771ddd2c8c46a280a9ab6cab8261f2",
+            .hash = "cli-0.10.0-2eKe_5kEAQBeHqKxUHNTGnETzu81rqKWwT1WPt1jXBt0",
+        },
     },
     .paths = .{
         "build.zig",
