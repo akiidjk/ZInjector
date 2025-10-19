@@ -13,6 +13,30 @@ pub const FALSE = win32.everything.FALSE;
 pub const TRUE = win32.everything.TRUE;
 pub const INFINITE = win32.everything.INFINITE;
 
+// Function signature
+pub const WriteProcessMemory = system.diagnostics.debug.WriteProcessMemory;
+pub const GetModuleHandleA = system.library_loader.GetModuleHandleA;
+pub const GetProcAddress = system.library_loader.GetProcAddress;
+pub const CreateToolhelp32Snapshot = system.diagnostics.tool_help.CreateToolhelp32Snapshot;
+pub const Thread32First = system.diagnostics.tool_help.Thread32First;
+pub const Thread32Next = system.diagnostics.tool_help.Thread32Next;
+pub const GetThreadContext = system.diagnostics.debug.GetThreadContext;
+pub const SetThreadContext = system.diagnostics.debug.SetThreadContext;
+
+// Win constant/types
+pub const THREADENTRY32 = system.diagnostics.tool_help.THREADENTRY32;
+pub const TH32CS_SNAPTHREAD = system.diagnostics.tool_help.TH32CS_SNAPTHREAD;
+pub const CONTEXT = system.diagnostics.debug.CONTEXT;
+pub const CONTEXT_AMD64 = 0x100000;
+pub const CONTEXT_INTEGER = (CONTEXT_AMD64 | 0x2);
+pub const CONTEXT_FLOATING_POINT = (CONTEXT_AMD64 | 0x8);
+pub const CONTEXT_CONTROL = (CONTEXT_AMD64 | 0x1);
+pub const CONTEXT_FULL = (CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_FLOATING_POINT);
+pub const CONTEXT_ALL: u32 = 0x001003FF;
+
+pub const HANDLE = std.os.windows.HANDLE;
+pub const DWORD = std.os.windows.DWORD;
+
 pub fn GetHandleProcessByName(name: [:0]const u8) ?*anyopaque {
     var entry: system.diagnostics.tool_help.PROCESSENTRY32 = undefined;
     entry.dwSize = @sizeOf(system.diagnostics.tool_help.PROCESSENTRY32);
