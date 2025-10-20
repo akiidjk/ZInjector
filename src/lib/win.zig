@@ -36,6 +36,7 @@ pub const CONTEXT_ALL: u32 = 0x001003FF;
 
 pub const HANDLE = std.os.windows.HANDLE;
 pub const DWORD = std.os.windows.DWORD;
+pub const PVOID = std.os.windows.PVOID;
 
 pub fn GetHandleProcessByName(name: [:0]const u8) ?*anyopaque {
     var entry: system.diagnostics.tool_help.PROCESSENTRY32 = undefined;

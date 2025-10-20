@@ -5,7 +5,9 @@ const logger = @import("logger");
 const win = @import("win");
 const cli = @import("cli");
 const dll = @import("dll-injection");
-const thread = @import("thread-hijacking");
+const thread = @import("thread");
+const hijacking = @import("hijacking");
+
 var config = struct {
     pid: ?u32 = null,
     processName: ?[]u8 = null,
@@ -54,22 +56,36 @@ pub fn main() !void {
                         },
                         cli.Command{
                             .name = "thread",
-                            .description = cli.Description{ .one_line = "execute a Thread Hijacking attack" },
+                            .description = cli.Description{ .one_line = "Create a remote thread in a process and inject a shellcode" },
                             .options = try r.allocOptions(&.{
                                 .{
                                     .long_name = "pid",
                                     .help = "Pid of the process",
-                                    .required = true,
+                                    .required = false,
                                     .short_alias = 'p',
                                     .value_ref = r.mkRef(&config.pid),
                                 },
-                                // .{
-                                //     .long_name = "process_name",
-                                //     .help = "Alternative to the process PID the name process (.exe)",
-                                //     .required = false,
-                                //     .short_alias = 'n',
-                                //     .value_ref = r.mkRef(&config.processName),
-                                // },
+                                .{
+                                    .long_name = "process_name",
+                                    .help = "Alternative to the process PID the name process (.exe)",
+                                    .required = false,
+                                    .short_alias = 'n',
+                                    .value_ref = r.mkRef(&config.processName),
+                                },
+                            }),
+                            .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = createRemoteThreadWrapper } },
+                        },
+                        cli.Command{
+                            .name = "hijacking",
+                            .description = cli.Description{ .one_line = "Execute a thread hijacking attack" },
+                            .options = try r.allocOptions(&.{
+                                .{
+                                    .long_name = "pid",
+                                    .help = "Pid of the process",
+                                    .required = false,
+                                    .short_alias = 'p',
+                                    .value_ref = r.mkRef(&config.pid),
+                                },
                             }),
                             .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = threadHijakingWrapper } },
                         },
@@ -89,6 +105,10 @@ fn dllInjectionWrapper() !void {
     try dll.dllInjection(config.pid, config.processName, config.dllPath);
 }
 
+fn createRemoteThreadWrapper() !void {
+    try thread.createRemoteThreadShellocode(config.pid, config.processName);
+}
+
 fn threadHijakingWrapper() !void {
-    try thread.threadHijacking(config.pid);
+    try hijacking.threadHijacking(config.pid);
 }
