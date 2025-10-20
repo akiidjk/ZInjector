@@ -5,7 +5,7 @@ Simple Process injector for Windows (for now) written in Zig.
 ## DISCLAIMER
 
 This is my first project in Zig so the code is pretty mmmm rude(?). The goal is to learn Zig and perform process injection.
-I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple process injection.
+I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple process injection attack on windows.
 
 ## Some cool resource for learning Zig and Process Injection
 
