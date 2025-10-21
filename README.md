@@ -37,7 +37,7 @@ Options:
 
 * `--dll_path, -d` *(required)* — path to the DLL (e.g. `C:\tools\payload.dll`)
 * `--pid, -p` — numeric PID of the target process
-* `--process_name, -n` — executable name of the target process (e.g. `notepad.exe`)
+* `--process_name, -n` — executable name of the target process (e.g. `notepad.exe`) (case insensitive)
 
 Examples:
 
@@ -67,7 +67,7 @@ zinjector thread (--pid <PID> | --process_name <name>)
 Options:
 
 * `--pid, -p` — numeric PID of the target process
-* `--process_name, -n` — executable name of the target process
+* `--process_name, -n` — executable name of the target process (case insensitive)
 
 Examples:
 
