@@ -126,6 +126,7 @@ zinjector hijacking -p 2020
 - [Zig Guide](https://zig.guide/)
 - [Zig Standard Library](https://ziglang.org/documentation/master/std/)
 - [LearnXInYMinutes](https://learnxinyminutes.com/zig/)
+- [Zig book](https://pedropark99.github.io/zig-book/)
 - [Process Injection Techniques](https://www.ired.team/offensive-security/code-injection-process-injection)
 - [MITRE](https://attack.mitre.org/techniques/T1055/)
 - [DLL Injector C++](https://github.com/leetCipher/Malware.development/tree/main/dll-injector)
