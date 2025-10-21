@@ -22,31 +22,43 @@ pub fn main() !void {
         .author = "akiidjk",
         .command = cli.Command{
             .name = "zinjector",
-            .description = cli.Description{ .one_line = "main commnad" },
+            .description = cli.Description{
+                .one_line = "Windows process injection toolkit (DLL injection, remote thread, thread hijacking)",
+                .detailed = "zinjector is a small command-line toolkit for performing common Windows process injection techniques.\n" ++
+                    "Use --help on each subcommand to see detailed options and examples.\n" ++
+                    "WARNING: These techniques modify other processes and are potentially dangerous or malicious if used improperly. Use only on systems you own or have explicit permission to test.\n",
+            },
             .target = cli.CommandTarget{
                 .subcommands = try r.allocCommands(
                     &.{
                         cli.Command{
                             .name = "dll",
-                            .description = cli.Description{ .one_line = "execute a DLL Injection" },
+                            .description = cli.Description{
+                                .one_line = "Inject a DLL into a target process",
+                                .detailed = "Performs a standard DLL injection by opening the target process, allocating memory for the DLL path,\n" ++
+                                    "writing the path, and creating a remote thread that calls LoadLibraryA (or equivalent).\n\n" ++
+                                    "Examples:\n" ++
+                                    "  zinjector dll -d C:\\\\payload.dll -p 1234\n" ++
+                                    "  zinjector dll -d ./payload.dll -n notepad.exe\n",
+                            },
                             .options = try r.allocOptions(&.{
                                 .{
                                     .long_name = "dll_path",
                                     .short_alias = 'd',
-                                    .help = "Path to DLL",
+                                    .help = "Path to the DLL to inject (required). Example: C:\\\\tools\\\\payload.dll or .\\payload.dll",
                                     .required = true,
                                     .value_ref = r.mkRef(&config.dllPath),
                                 },
                                 .{
                                     .long_name = "pid",
-                                    .help = "Pid of the process",
+                                    .help = "PID of the target process (numeric). Example: 1234",
                                     .required = false,
                                     .short_alias = 'p',
                                     .value_ref = r.mkRef(&config.pid),
                                 },
                                 .{
                                     .long_name = "process_name",
-                                    .help = "Alternative to the process PID the name process (.exe)",
+                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now.",
                                     .required = false,
                                     .short_alias = 'n',
                                     .value_ref = r.mkRef(&config.processName),
@@ -56,18 +68,27 @@ pub fn main() !void {
                         },
                         cli.Command{
                             .name = "thread",
-                            .description = cli.Description{ .one_line = "Create a remote thread in a process and inject a shellcode" },
+                            .description = cli.Description{
+                                .one_line = "Create a remote thread and run an in-memory payload in the target process",
+                                .detailed = "Allocates executable memory in the target process, writes a shellcode there,\n" ++
+                                    "and creates a remote thread to start execution. Useful for running raw shellcode without a DLL.\n\n" ++
+                                    "Payload delivery is implementation-specific (stdin, file, embedded). Ensure the payload is compatible\n" ++
+                                    "with the target architecture (x86 vs x64) and calling conventions.\n\n" ++
+                                    "Examples:\n" ++
+                                    "  zinjector thread -p 4321\n" ++
+                                    "  zinjector thread -n explorer.exe\n",
+                            },
                             .options = try r.allocOptions(&.{
                                 .{
                                     .long_name = "pid",
-                                    .help = "Pid of the process",
+                                    .help = "PID of the target process (numeric).",
                                     .required = false,
                                     .short_alias = 'p',
                                     .value_ref = r.mkRef(&config.pid),
                                 },
                                 .{
                                     .long_name = "process_name",
-                                    .help = "Alternative to the process PID the name process (.exe)",
+                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now.",
                                     .required = false,
                                     .short_alias = 'n',
                                     .value_ref = r.mkRef(&config.processName),
@@ -77,11 +98,23 @@ pub fn main() !void {
                         },
                         cli.Command{
                             .name = "hijacking",
-                            .description = cli.Description{ .one_line = "Execute a thread hijacking attack" },
+                            .description = cli.Description{
+                                .one_line = "Hijack an existing thread in a target process and redirect its execution",
+                                .detailed = "Performs thread hijacking by suspending a target thread, changing its instruction pointer\n" ++
+                                    "to a payload area (or trampoline), and resuming the thread. This avoids creating new threads and\n" ++
+                                    "can be stealthier in some scenarios.\n\n" ++
+                                    "Target selection (required):\n" ++
+                                    "Notes:\n" ++
+                                    "  - Now the attack isn't working, and I don't know why lol" ++
+                                    "  - Thread selection may target the main thread or choose a suitable thread automatically.\n" ++
+                                    "  - Ensure payload size and memory protection are handled correctly before resuming the thread.\n\n" ++
+                                    "Example:\n" ++
+                                    "  zinjector hijacking -p 5555\n",
+                            },
                             .options = try r.allocOptions(&.{
                                 .{
                                     .long_name = "pid",
-                                    .help = "Pid of the process",
+                                    .help = "PID of the target process whose thread will be hijacked.",
                                     .required = false,
                                     .short_alias = 'p',
                                     .value_ref = r.mkRef(&config.pid),
