@@ -8,7 +8,7 @@ pub fn dllInjection(
     processName: ?[]u8,
     dllPath: []const u8,
 ) anyerror!void {
-    const allocator: std.mem.Allocator = std.heap.page_allocator;
+    const allocator: std.mem.Allocator = std.heap.smp_allocator;
 
     var hProcess: ?*anyopaque = undefined;
     var abs_path: []const u8 = undefined;

@@ -8,14 +8,15 @@ const dll = @import("./lib/attacks/dll-injection.zig");
 const thread = @import("./lib/attacks/thread.zig");
 const hijacking = @import("./lib/attacks/hijacking.zig");
 
-var config = struct {
+var params = struct {
     pid: ?u32 = null,
     processName: ?[]u8 = null,
     dllPath: []const u8 = "",
 }{};
 
 pub fn main() !void {
-    var r = try cli.AppRunner.init(std.heap.page_allocator);
+    const allocator = std.heap.smp_allocator;
+    var r = try cli.AppRunner.init(allocator);
 
     const app = cli.App{
         .version = "1.0.0",
@@ -47,21 +48,21 @@ pub fn main() !void {
                                     .short_alias = 'd',
                                     .help = "Path to the DLL to inject (required). Example: C:\\\\tools\\\\payload.dll or .\\payload.dll",
                                     .required = true,
-                                    .value_ref = r.mkRef(&config.dllPath),
+                                    .value_ref = r.mkRef(&params.dllPath),
                                 },
                                 .{
                                     .long_name = "pid",
                                     .help = "PID of the target process (numeric). Example: 1234",
                                     .required = false,
                                     .short_alias = 'p',
-                                    .value_ref = r.mkRef(&config.pid),
+                                    .value_ref = r.mkRef(&params.pid),
                                 },
                                 .{
                                     .long_name = "process_name",
-                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now.",
+                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now. (case insensitive)",
                                     .required = false,
                                     .short_alias = 'n',
-                                    .value_ref = r.mkRef(&config.processName),
+                                    .value_ref = r.mkRef(&params.processName),
                                 },
                             }),
                             .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = dllInjectionWrapper } },
@@ -84,14 +85,14 @@ pub fn main() !void {
                                     .help = "PID of the target process (numeric).",
                                     .required = false,
                                     .short_alias = 'p',
-                                    .value_ref = r.mkRef(&config.pid),
+                                    .value_ref = r.mkRef(&params.pid),
                                 },
                                 .{
                                     .long_name = "process_name",
-                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now.",
+                                    .help = "Alternative to PID: target process executable name (e.g. Notepad.exe) case sensitive for now. (case insensitive)",
                                     .required = false,
                                     .short_alias = 'n',
-                                    .value_ref = r.mkRef(&config.processName),
+                                    .value_ref = r.mkRef(&params.processName),
                                 },
                             }),
                             .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = createRemoteThreadWrapper } },
@@ -117,7 +118,7 @@ pub fn main() !void {
                                     .help = "PID of the target process whose thread will be hijacked.",
                                     .required = false,
                                     .short_alias = 'p',
-                                    .value_ref = r.mkRef(&config.pid),
+                                    .value_ref = r.mkRef(&params.pid),
                                 },
                             }),
                             .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = threadHijakingWrapper } },
@@ -135,13 +136,13 @@ fn run() !void {
 }
 
 fn dllInjectionWrapper() !void {
-    try dll.dllInjection(config.pid, config.processName, config.dllPath);
+    try dll.dllInjection(params.pid, params.processName, params.dllPath);
 }
 
 fn createRemoteThreadWrapper() !void {
-    try thread.createRemoteThreadShellocode(config.pid, config.processName);
+    try thread.createRemoteThreadShellocode(params.pid, params.processName);
 }
 
 fn threadHijakingWrapper() !void {
-    try hijacking.threadHijacking(config.pid);
+    try hijacking.threadHijacking(params.pid);
 }

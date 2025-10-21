@@ -44,8 +44,7 @@ fn win32MainThreadEntrypoint(param: ?std.os.windows.LPVOID) callconv(.c) std.os.
 }
 
 fn win32MainThread() std.os.windows.DWORD {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
-    const allocator = gpa.allocator();
+    const allocator = std.heap.smp_allocator;
 
     var shell: []const []const u8 = undefined;
 

@@ -16,9 +16,7 @@ pub fn threadHijacking(
     threadContext.ContextFlags = win.CONTEXT_ALL;
     threadEntry.dwSize = @sizeOf(win.THREADENTRY32);
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+    const allocator = std.heap.smp_allocator;
 
     logger.debug("Starting thread hijacking...", .{});
 

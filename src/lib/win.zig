@@ -39,19 +39,33 @@ pub const DWORD = std.os.windows.DWORD;
 pub const PVOID = std.os.windows.PVOID;
 
 pub fn GetHandleProcessByName(name: [:0]const u8) ?*anyopaque {
+    const allocator = std.heap.smp_allocator;
     var entry: system.diagnostics.tool_help.PROCESSENTRY32 = undefined;
     entry.dwSize = @sizeOf(system.diagnostics.tool_help.PROCESSENTRY32);
 
-    logger.debug("Name: {s}", .{name});
+    const lowerCaseName = std.ascii.allocLowerString(allocator, name) catch |err| switch (err) {
+        else => {
+            logger.err("Error during toLowerString in lowerCaseName", .{});
+            return null;
+        },
+    };
+    defer allocator.free(lowerCaseName);
+    logger.debug("Name: {s}", .{lowerCaseName});
 
     const snapshot = system.diagnostics.tool_help.CreateToolhelp32Snapshot(system.diagnostics.tool_help.TH32CS_SNAPPROCESS, 0);
 
     if (system.diagnostics.tool_help.Process32First(snapshot, &entry) == TRUE) {
         while (system.diagnostics.tool_help.Process32Next(snapshot, &entry) == TRUE) {
             const length = std.mem.len(@as([*:0]u8, @ptrCast(&entry.szExeFile)));
-            const processName: []u8 = entry.szExeFile[0..length];
+            const processName: []u8 = std.ascii.allocLowerString(allocator, entry.szExeFile[0..length]) catch |err| switch (err) {
+                else => {
+                    logger.err("Error during toLowerString in processName", .{});
+                    return null;
+                },
+            };
+            defer allocator.free(processName);
             logger.debug("Process founded: {s}", .{processName});
-            if (std.mem.eql(u8, processName, name)) {
+            if (std.mem.eql(u8, processName, lowerCaseName)) {
                 const hProcess = threads.OpenProcess(threads.PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
                 return hProcess;
             }
