@@ -61,24 +61,23 @@ pub fn build(b: *std.Build) void {
 
     const libmod = b.addModule("lib", .{ .root_source_file = b.path("src/lib/root.zig"), .target = target, .imports = &.{.{ .name = "logger", .module = loggerModule }} });
 
-    const injector = b.addExecutable(.{
+    const dll_injection = b.addModule("dll-injection", .{ .root_source_file = b.path("src/lib/attacks/dll-injection.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
+    const thread = b.addModule("thread", .{ .root_source_file = b.path("src/lib/attacks/thread.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
+
+    const hijacking = b.addModule("hijacking", .{ .root_source_file = b.path("src/lib/attacks/hijacking.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
+
+    const exe = b.addExecutable(.{
         .name = "zinjector",
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
             .link_libc = true,
-            .imports = &.{
-                .{ .name = "lib", .module = libmod },
-                .{ .name = "win32", .module = zigwin32.module("win32") },
-                .{ .name = "win", .module = winModule },
-                .{ .name = "logger", .module = loggerModule },
-                .{ .name = "cli", .module = cli.module("cli") },
-            },
+            .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "cli", .module = cli.module("cli") }, .{ .name = "dll-injection", .module = dll_injection }, .{ .name = "thread", .module = thread }, .{ .name = "hijacking", .module = hijacking } },
         }),
     });
 
-    b.installArtifact(injector);
+    b.installArtifact(exe);
 
     const lib_test_module = b.addTest(.{
         .root_module = libmod,
