@@ -133,7 +133,6 @@ zinjector hijacking -p 2020
 - https://github.com/marlersoft/zigwin32/tree/main
 - https://raw.githubusercontent.com/marlersoft/zigwin32/refs/heads/main/win32/everything.zig
 - https://black-hat-zig.cx330.tw/
-- https://privdayz.com/tools/shellcode-gen
 
 ### Legal and safety warning
 
