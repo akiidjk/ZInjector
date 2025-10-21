@@ -12,7 +12,6 @@ pub fn dllInjection(
 
     var hProcess: ?*anyopaque = undefined;
     var abs_path: []const u8 = undefined;
-    var tmp: [1024]u8 = undefined;
 
     const isAbs = try lib.isAbsolutePath(dllPath);
     if (!isAbs) {
@@ -28,7 +27,7 @@ pub fn dllInjection(
             return;
         }
     } else if (processName != null) {
-        const processNameString = try std.fmt.bufPrintZ(&tmp, "{s}", .{processName.?});
+        const processNameString = lib.convertToCString(processName.?);
         hProcess = win.GetHandleProcessByName(processNameString);
         if (hProcess == null) {
             logger.err("Failed to handle the process by name not found or not accesible", .{});

