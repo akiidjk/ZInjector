@@ -4,9 +4,9 @@ const lib = @import("lib");
 const logger = @import("logger");
 const win = @import("win");
 const cli = @import("cli");
-const dll = @import("dll-injection");
-const thread = @import("thread");
-const hijacking = @import("hijacking");
+const dll = @import("./lib/attacks/dll-injection.zig");
+const thread = @import("./lib/attacks/thread.zig");
+const hijacking = @import("./lib/attacks/hijacking.zig");
 
 var config = struct {
     pid: ?u32 = null,
