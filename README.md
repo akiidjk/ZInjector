@@ -106,6 +106,22 @@ zinjector hijacking -p 5555
 
 ---
 
+#### `Hook`
+
+Performs SetWindowHookEx Code Injection: Load a library get the address of a an exported function from the DLL and set a window hook to the keayboard to a thread (0 for all thread in the desktop, not not recommended).
+
+Syntax:
+
+```sh
+zinjector hook --dll <DLLPATH>
+```
+
+Options:
+
+* `--dll_path, -d` *(required)* — path to the DLL (e.g. `C:\tools\payload.dll`)
+
+---
+
 ### Full examples
 
 ```sh
@@ -155,7 +171,7 @@ Deps for cross-compiler on linux:  mingw-w64-headers,mingw-w64-gcc
 - [x] Search process by name
 - [x] Implement arguments parsing
 - [x] Thread Remote creation with shellcode injection
-- [ ] SetWindowHookEx Code Injection
+- [x] SetWindowHookEx Code Injection
 - [ ] ...
 
 ## Command for dev/testing:
