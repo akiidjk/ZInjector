@@ -7,6 +7,7 @@ const cli = @import("cli");
 const dll = @import("./lib/attacks/dll-injection.zig");
 const thread = @import("./lib/attacks/thread.zig");
 const hijacking = @import("./lib/attacks/hijacking.zig");
+const hook = @import("./lib/attacks/hook.zig");
 
 var params = struct {
     pid: ?u32 = null,
@@ -123,6 +124,28 @@ pub fn main() !void {
                             }),
                             .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = threadHijakingWrapper } },
                         },
+                        cli.Command{
+                            .name = "hook",
+                            .description = cli.Description{
+                                .one_line = "Inject code into a target process using SetWindowHookEx (Windows hook injection)",
+                                .detailed = "Performs code injection by installing a Windows hook in the target process using SetWindowHookEx.\n" ++
+                                    "This technique leverages the Windows message hooking mechanism to execute custom code in the context of another process.\n" ++
+                                    "Commonly used for injecting DLLs or shellcode into GUI applications. Requires the target process to have a message loop.\n\n" ++
+                                    "Examples:\n" ++
+                                    "  zinjector hook -p 4321\n" ++
+                                    "  zinjector hooj -n explorer.exe\n",
+                            },
+                            .options = try r.allocOptions(&.{
+                                .{
+                                    .long_name = "dll_path",
+                                    .short_alias = 'd',
+                                    .help = "Path to the DLL to inject (required). Example: C:\\\\tools\\\\payload.dll or .\\payload.dll",
+                                    .required = true,
+                                    .value_ref = r.mkRef(&params.dllPath),
+                                },
+                            }),
+                            .target = cli.CommandTarget{ .action = cli.CommandAction{ .exec = hookInjectionWrapper } },
+                        },
                     },
                 ),
             },
@@ -145,4 +168,8 @@ fn createRemoteThreadWrapper() !void {
 
 fn threadHijakingWrapper() !void {
     try hijacking.threadHijacking(params.pid);
+}
+
+fn hookInjectionWrapper() !void {
+    try hook.hookInjection(params.dllPath);
 }

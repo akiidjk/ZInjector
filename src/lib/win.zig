@@ -37,6 +37,9 @@ pub const CONTEXT_ALL: u32 = 0x001003FF;
 pub const HANDLE = std.os.windows.HANDLE;
 pub const DWORD = std.os.windows.DWORD;
 pub const PVOID = std.os.windows.PVOID;
+pub const HMODULE = std.os.windows.HMODULE;
+pub const HINSTANCE = std.os.windows.HINSTANCE;
+pub const HOOKPROC = ui.windows_and_messaging.HOOKPROC;
 
 pub fn GetHandleProcessByName(name: [:0]const u8) ?*anyopaque {
     const allocator = std.heap.smp_allocator;

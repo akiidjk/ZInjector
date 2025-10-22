@@ -24,6 +24,8 @@ pub fn build(b: *std.Build) void {
         .module = zigwin32.module("win32"),
     }, .{ .name = "logger", .module = loggerModule } } });
 
+    const libmod = b.addModule("lib", .{ .root_source_file = b.path("src/lib/root.zig"), .target = target, .imports = &.{.{ .name = "logger", .module = loggerModule }} });
+
     // Dll compilation for windows
     const dlls = &[_]struct {
         name: []const u8,
@@ -33,6 +35,7 @@ pub fn build(b: *std.Build) void {
         .{ .name = "console", .path = "src/dll/console.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
         .{ .name = "messageBoxs", .path = "src/dll/messageBoxs.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
         .{ .name = "reverseShell", .path = "src/dll/reverseShell.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule } } },
+        .{ .name = "hook", .path = "src/dll/hook.zig", .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } },
     };
 
     for (dlls) |dll| {
@@ -58,14 +61,6 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(testExe);
 
     // Injector + Attacks
-
-    const libmod = b.addModule("lib", .{ .root_source_file = b.path("src/lib/root.zig"), .target = target, .imports = &.{.{ .name = "logger", .module = loggerModule }} });
-
-    const dll_injection = b.addModule("dll-injection", .{ .root_source_file = b.path("src/lib/attacks/dll-injection.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
-    const thread = b.addModule("thread", .{ .root_source_file = b.path("src/lib/attacks/thread.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
-
-    const hijacking = b.addModule("hijacking", .{ .root_source_file = b.path("src/lib/attacks/hijacking.zig"), .target = target, .imports = &.{ .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "lib", .module = libmod } } });
-
     const exe = b.addExecutable(.{
         .name = "zinjector",
         .root_module = b.createModule(.{
@@ -73,7 +68,13 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
-            .imports = &.{ .{ .name = "lib", .module = libmod }, .{ .name = "win32", .module = zigwin32.module("win32") }, .{ .name = "win", .module = winModule }, .{ .name = "logger", .module = loggerModule }, .{ .name = "cli", .module = cli.module("cli") }, .{ .name = "dll-injection", .module = dll_injection }, .{ .name = "thread", .module = thread }, .{ .name = "hijacking", .module = hijacking } },
+            .imports = &.{
+                .{ .name = "lib", .module = libmod },
+                .{ .name = "win32", .module = zigwin32.module("win32") },
+                .{ .name = "win", .module = winModule },
+                .{ .name = "logger", .module = loggerModule },
+                .{ .name = "cli", .module = cli.module("cli") },
+            },
         }),
     });
 
