@@ -95,10 +95,9 @@ pub fn isADigitsString(string: [:0]const u8) bool {
     return true;
 }
 
-pub fn convertToCString(string: []const u8) [:0]const u8 {
-    var tmp: [1024]u8 = undefined;
-    const fixedString = std.fmt.bufPrintZ(&tmp, "{s}", .{string}) catch |err| switch (err) {
-        error.NoSpaceLeft => {
+pub fn convertToCString(allocator: std.mem.Allocator, string: []const u8) [:0]const u8 {
+    const fixedString = allocator.dupeZ(u8, string) catch |err| switch (err) {
+        error.OutOfMemory => {
             return "";
         },
     };

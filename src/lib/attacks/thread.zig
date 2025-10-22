@@ -29,7 +29,8 @@ pub fn createRemoteThreadShellocode(
             return;
         }
     } else if (processName != null) {
-        const processNameString = lib.convertToCString(processName.?);
+        const processNameString = lib.convertToCString(allocator, processName.?);
+        defer allocator.free(processNameString);
         processHandle = win.GetHandleProcessByName(processNameString);
         if (processHandle == null) {
             logger.err("Failed to handle the process by name not found or not accesible", .{});

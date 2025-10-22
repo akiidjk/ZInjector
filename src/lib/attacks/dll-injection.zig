@@ -27,7 +27,8 @@ pub fn dllInjection(
             return;
         }
     } else if (processName != null) {
-        const processNameString = lib.convertToCString(processName.?);
+        const processNameString = lib.convertToCString(allocator, processName.?);
+        defer allocator.free(processNameString);
         hProcess = win.GetHandleProcessByName(processNameString);
         if (hProcess == null) {
             logger.err("Failed to handle the process by name not found or not accesible", .{});
